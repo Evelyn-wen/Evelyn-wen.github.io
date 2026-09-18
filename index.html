@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Yihan (Evelyn) Wen — PhD Student in Strategy at The University of Hong Kong." />
+  <title>Yihan (Evelyn) Wen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="page-shell">
+    <main class="profile-card">
+      <section class="left-col">
+        <p class="eyebrow">Strategy · AI · Technology</p>
+
+        <h1>Yihan <span>(Evelyn)</span> Wen</h1>
+
+        <p class="subtitle">
+          PhD Student in Strategy at The University of Hong Kong
+        </p>
+
+        <div class="intro">
+          <p>
+            I am a PhD student in Strategy at The University of Hong Kong, with a background
+            in Finance from Peking University’s Guanghua School of Management.
+          </p>
+
+          <p>
+            My interests lie at the intersection of artificial intelligence, strategy, and organizations,
+            with a particular interest in organizational transformation and technology entrepreneurship.
+            I am curious about how emerging technologies reshape firms, industries, innovation,
+            and the creation of new business opportunities.
+          </p>
+
+          <p class="reachout">
+            I am always happy to connect with researchers, practitioners, founders, and investors
+            working on related topics. Feel free to reach out.
+          </p>
+        </div>
+
+        <div class="interest-row">
+          <span>Artificial Intelligence and Strategy</span>
+          <span>Organizational Transformation</span>
+          <span>Technology Entrepreneurship</span>
+        </div>
+      </section>
+
+      <aside class="right-col">
+        <div class="portrait-wrap">
+          <img src="headshot.jpg" alt="Portrait of Yihan Evelyn Wen" class="portrait" />
+        </div>
+
+        <div class="contact-panel">
+          <div class="panel-top">
+            <p class="panel-label">Connect</p>
+            <p class="panel-note">Links</p>
+          </div>
+
+          <a href="https://www.linkedin.com/in/evelyn-w-b27555374" target="_blank" rel="noopener">
+            <span>LinkedIn</span>
+            <span class="meta">Professional profile</span>
+          </a>
+
+          <a href="https://github.com/Evelyn-wen" target="_blank" rel="noopener">
+            <span>GitHub</span>
+            <span class="meta">Research &amp; code</span>
+          </a>
+
+          <a href="mailto:evelynwen@connect.hku.hk">
+            <span>Email</span>
+            <span class="meta">evelynwen@connect.hku.hk</span>
+          </a>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>Hong Kong</span>
+      <span>© <span id="year"></span> Yihan (Evelyn) Wen</span>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
