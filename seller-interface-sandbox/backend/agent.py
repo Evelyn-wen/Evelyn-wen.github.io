@@ -73,36 +73,135 @@ def mock_reply(message):
     return {'mode':'mock_rule_based','reply':'\n'.join(facts),'tool_trace':trace,'demo_only':True,
             'data_version':d['data_version']}
 
-def llm_reply(message, history=None):
-    key=os.getenv('OPENAI_API_KEY')
-    if not key:
-        raise RuntimeError('OPENAI_API_KEY is not configured; use mode=mock or set a key.')
-    from openai import OpenAI
-    client=OpenAI(api_key=key, timeout=40.0)
+
+
+def _response_tools():
+    """Convert legacy Chat Completions tool schemas to Responses tool format."""
+    return [
+        {
+            'type': 'function',
+            'name': tool['function']['name'],
+            'description': tool['function']['description'],
+            'parameters': tool['function']['parameters'],
+            'strict': False,
+        }
+        for tool in TOOLS
+    ]
+
+
+def _llm_via_responses(client, model, message, history):
+    """GPT-6 family tool calls require Responses, not Chat Completions."""
+    inputs=[]
+    for record in (history or [])[-8:]:
+        if record.get('role') in ('user', 'assistant') and isinstance(record.get('content'), str):
+            inputs.append({'role':record['role'], 'content':record['content'][:4000]})
+    inputs.append({'role':'user', 'content':message})
+    trace=[]
+    usage={'input_tokens':0, 'output_tokens':0, 'total_tokens':0}
+    for attempt in range(5):
+        response=client.responses.create(
+            model=model, instructions=SYSTEM_PROMPT, input=inputs,
+            tools=_response_tools(),
+            tool_choice='required' if attempt == 0 else 'auto',
+        )
+        if getattr(response, 'usage', None):
+            for k in usage:
+                usage[k]+=int(getattr(response.usage,k,0) or 0)
+        output=list(getattr(response, 'output', None) or [])
+        function_calls=[item for item in output if getattr(item,'type',None)=='function_call']
+        if not function_calls:
+            reply=(getattr(response, 'output_text', None) or '').strip()
+            if not trace:
+                raise RuntimeError(
+                    'The LLM returned no function calls. GPT-6.1 Terra requires the Responses API '
+                    'for tool calling; this Grsai route may not implement Responses tool calls. '
+                    'Try a provider/model with supported Responses tool calling.'
+                )
+            if not reply:
+                raise RuntimeError(
+                    f'The model returned no answer after {len(trace)} tool call(s). '
+                    f'Responses status: {getattr(response,"status","unknown")}. '
+                    'Check third-party provider compatibility.'
+                )
+            return {'mode':'llm_tool_calling','api_mode':'responses','model':model,
+                    'reply':reply,'tool_trace':trace,'usage':usage,
+                    'demo_only':True,'data_version':merchant_data()['data_version']}
+
+        # Preserve the exact function-call and reasoning items for the next model turn.
+        inputs.extend(output)
+        for item in function_calls:
+            kwargs={}
+            try:
+                kwargs=json.loads(item.arguments or '{}')
+                value=execute_tool(item.name,kwargs)
+            except Exception as exc:
+                value={'error':str(exc)}
+            trace.append({'tool':item.name,'args':kwargs})
+            inputs.append({
+                'type':'function_call_output',
+                'call_id':item.call_id,
+                'output':json.dumps(value,ensure_ascii=False)
+            })
+    raise RuntimeError(f'Tool call iteration limit reached ({len(trace)} calls); no final model answer.')
+
+
+def _llm_via_chat(client, model, message, history):
+    """Legacy model path for models supporting Chat Completions tools."""
     msgs=[{'role':'system','content':SYSTEM_PROMPT}]
     for record in (history or [])[-8:]:
         if record.get('role') in ('user','assistant') and isinstance(record.get('content'),str):
             msgs.append({'role':record['role'],'content':record['content'][:4000]})
     msgs.append({'role':'user','content':message})
     trace=[]
-    model=os.getenv('OPENAI_MODEL','gpt-4.1-mini')
-    for attempt in range(4):
-        completion=client.chat.completions.create(model=model,messages=msgs,tools=TOOLS,tool_choice='required' if attempt == 0 else 'auto',temperature=0)
+    for attempt in range(5):
+        kwargs={'model':model,'messages':msgs,'tools':TOOLS,
+                'tool_choice':'required' if attempt==0 else 'auto'}
+        if model.startswith('gpt-4'):
+            kwargs['temperature']=0
+        completion=client.chat.completions.create(**kwargs)
         choice=completion.choices[0].message
-        if choice.tool_calls:
-            msgs.append({'role':'assistant','content':choice.content or '', 'tool_calls':[{'id':t.id,'type':'function','function':{'name':t.function.name,'arguments':t.function.arguments}} for t in choice.tool_calls]})
-        else:
-            msgs.append({'role':'assistant','content':choice.content or ''})
-        if not choice.tool_calls:
-            return {'mode':'llm_tool_calling','model':model,'reply':choice.content or '', 'tool_trace':trace,
+        calls=list(choice.tool_calls or [])
+        if not calls:
+            reply=(choice.content or '').strip()
+            if not trace:
+                raise RuntimeError(
+                    'Model returned no tool calls. It may not support tool calling via '
+                    'Chat Completions; switch to a supported model/endpoint.'
+                )
+            if not reply:
+                finish=completion.choices[0].finish_reason
+                raise RuntimeError(f'Model returned an empty answer (finish_reason={finish}).')
+            return {'mode':'llm_tool_calling','api_mode':'chat_completions','model':model,
+                    'reply':reply,'tool_trace':trace,
                     'demo_only':True,'data_version':merchant_data()['data_version']}
-        for tool in choice.tool_calls:
+        msgs.append({'role':'assistant','content':choice.content or '',
+                     'tool_calls':[{'id':t.id,'type':'function',
+                                    'function':{'name':t.function.name,
+                                                'arguments':t.function.arguments}}
+                                   for t in calls]})
+        for tool in calls:
+            args={}
             try:
-                kwargs=json.loads(tool.function.arguments or '{}')
-                value=execute_tool(tool.function.name,kwargs)
-                trace.append({'tool':tool.function.name,'args':kwargs})
+                args=json.loads(tool.function.arguments or '{}')
+                value=execute_tool(tool.function.name,args)
             except Exception as exc:
                 value={'error':str(exc)}
-            msgs.append({'role':'tool','tool_call_id':tool.id,'content':json.dumps(value,ensure_ascii=False)})
-    return {'mode':'llm_tool_calling','model':model,'reply':'Unable to complete within the tool-call limit.',
-            'tool_trace':trace,'demo_only':True,'data_version':merchant_data()['data_version']}
+            trace.append({'tool':tool.function.name,'args':args})
+            msgs.append({'role':'tool','tool_call_id':tool.id,
+                         'content':json.dumps(value,ensure_ascii=False)})
+    raise RuntimeError(f'Tool call iteration limit reached ({len(trace)} calls); no final answer.')
+
+
+def llm_reply(message,history=None):
+    key=os.getenv('OPENAI_API_KEY')
+    if not key:
+        raise RuntimeError('OPENAI_API_KEY is not configured; set it locally (never in GitHub).')
+    from openai import OpenAI
+    model=os.getenv('OPENAI_MODEL','gpt-4.1-mini')
+    client=OpenAI(api_key=key,timeout=50.0,max_retries=0)
+    api_mode=os.getenv('SELLER_API_MODE','auto').lower()
+    if api_mode not in ('auto','responses','chat'):
+        raise RuntimeError('SELLER_API_MODE must be auto, responses, or chat.')
+    if api_mode=='responses' or (api_mode=='auto' and model.startswith('gpt-6')):
+        return _llm_via_responses(client,model,message,history)
+    return _llm_via_chat(client,model,message,history)
