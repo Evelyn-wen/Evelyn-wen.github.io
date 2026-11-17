@@ -1,12 +1,18 @@
 """FastAPI service for the API and Seller Agent comparison groups."""
 from typing import Optional, Literal
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from .store import public_profile, menu_items, available_slots, merchant_data
 from .agent import mock_reply, llm_reply
 
 app=FastAPI(title='Casa Oliva Seller-side Interface Sandbox', version='0.1.0',
             description='Simulation only. No bookings, inventory updates, or payments.')
+
+@app.get('/demo',response_class=HTMLResponse)
+def demo():
+    return (Path(__file__).with_name('demo.html')).read_text(encoding='utf8')
 
 @app.get('/health')
 def health():
