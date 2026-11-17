@@ -3,6 +3,7 @@ from typing import Optional, Literal
 import httpx
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
+from openai import APIStatusError, APIConnectionError, APITimeoutError
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from .store import public_profile, menu_items, available_slots, merchant_data
@@ -54,6 +55,18 @@ def agent(req:AgentRequest):
         return mock_reply(req.message)
     try:
         return llm_reply(req.message,[m.model_dump() for m in req.history])
+    except APIStatusError as exc:
+        # Provide meaningful JSON rather than an unhandled 500 and invalid HTML.
+        raise HTTPException(status_code=502,detail={
+            'error':'upstream_model_request_failed',
+            'provider_status':exc.status_code,
+            'hint':'Check Grsai support for /v1/responses, model availability and tool calling.',
+        })
+    except (APIConnectionError, APITimeoutError):
+        raise HTTPException(status_code=502,detail={
+            'error':'upstream_model_connection_failed',
+            'hint':'Could not reach LLM provider; check network, API base URL and timeout.',
+        })
     except RuntimeError as exc:
         raise HTTPException(status_code=503,detail=str(exc))
 
@@ -82,3 +95,8 @@ async def buyer(req:BuyerRequest):
         raise HTTPException(status_code=503,detail=str(exc))
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=502,detail=f'Seller interface request failed ({exc.response.status_code}). Check Seller Agent mode/API key.')
+
+
+# New two-seller competition routes. Existing endpoints/LLM remain unchanged.
+from .competition import router as competition_router
+app.include_router(competition_router)
