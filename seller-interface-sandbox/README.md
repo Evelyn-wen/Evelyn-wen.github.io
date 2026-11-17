@@ -73,3 +73,53 @@ python -m pytest -q tests
 - All 16 capacity entries are **maximum party size for that time/seat option**, not seats left. Status `fully_booked` means zero capacity. No transaction state changes.
 - V0 demo dates are Dec 4–6, 2026, so an unspecified query date is not treated as live availability.
 - Security: do not expose an unauthenticated paid LLM endpoint publicly. Add API keys, rate limits, and a budget limit before public deployment.
+
+## Buyer Agent v0.1 (new)
+
+From the project folder, after activating your virtual environment and restarting the
+server, visit `http://127.0.0.1:8000/demo` and choose **Buyer Agent · 四种接口**.
+
+- **Interface:** Website (read visible HTML), JS File (read exported JS), REST API
+  (GET three endpoints), or Seller Agent (POST to the seller dialogue endpoint).
+- **Buyer mode = Free Mock:** offline, no LLM/API key; deterministic extraction of
+  one well-formed sample reservation request. This confirms plumbing but is **NOT**
+  a research result about LLM agents. Seller Agent mock is likewise rule-based.
+- **Buyer mode = LLM:** one model call using the *selected interface's observed
+  response*. Configure `OPENAI_API_KEY` locally; optional `BUYER_OPENAI_MODEL`
+  controls the buyer model (default uses `OPENAI_MODEL` or `gpt-4.1-mini`).
+- **Trace:** HTTP method, local route, HTTP status, bytes returned, approximate
+  duration, observation length, final answer and token usage (LLM mode only).
+- **Seller mode:** when the chosen interface is Seller Agent, select Mock or LLM;
+  the latter also needs an API key and incurs further model cost.
+
+The four data routes are served by the SAME local FastAPI app:
+`GET /seller/website` returns the actual Website V0 HTML file,
+`GET /seller/js-file/merchant.js` returns the JS module,
+`GET /api/{restaurant,menu,availability}` returns independent REST responses,
+and `POST /agent/message` invokes the Seller Agent. The buyer uses the local
+HTTP/ASGI transport, so no external GitHub Pages availability is required.
+It does NOT secretly read `data/merchant.json` for the Website/JS arms.
+
+**Research limitation:** This is a one-shot, one-merchant pilot with fixed access
+patterns and *unequal numbers of calls* across interfaces. The Website reader
+strips HTML styling/scripts to visible text (it does not click buttons).
+The LLM buyer receives a collected observation rather than autonomously choosing
+multiple tool calls. Seller Agent Mock also preprocesses the consumer's query.
+Consequently, timings and token totals are preliminary engineering diagnostics,
+NOT a fair causal comparison of four fully autonomous interfaces. We should
+later add a standardized tool budget, browser-navigation baseline, repeated tasks,
+scoring rubric, and comparable seller-model conditions.
+
+### Example test request
+
+```bash
+curl -X POST http://127.0.0.1:8000/buyer/run \
+  -H 'Content-Type: application/json' \
+  -d '{"task":"2026-12-04 19:00，4人，户外有座位吗？还有其他时间吗？","interface":"website","buyer_mode":"mock"}'
+```
+
+**To update an already-downloaded copy** on a Mac external drive: after stopping
+Uvicorn with `Ctrl+C`, download the latest project (or apply the included update
+patch), run `python -m pip install -r backend/requirements.txt` inside the existing
+venv, restart `python -m uvicorn backend.app:app --reload`, and refresh `/demo`.
+The external disk must remain connected while running the service.
