@@ -44,3 +44,8 @@ def test_missing_key_returns_error(monkeypatch):
     monkeypatch.delenv('OPENAI_API_KEY',raising=False)
     r=client.post('/agent/message',json={'mode':'llm','message':'Hello'})
     assert r.status_code==503
+
+def test_demo_page():
+    r=client.get('/demo')
+    assert r.status_code==200
+    assert 'Run Experiment' in r.text
