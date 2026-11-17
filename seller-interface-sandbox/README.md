@@ -124,9 +124,35 @@ patch), run `python -m pip install -r backend/requirements.txt` inside the exist
 venv, restart `python -m uvicorn backend.app:app --reload`, and refresh `/demo`.
 The external disk must remain connected while running the service.
 
+---
 
-## Unified four-interface console (updated 2026-11-17)
+# Two-Seller Competition v0.1 — Casa Oliva vs Casa Verde
 
-The `/demo` dashboard now has four separate **seller-facing** tabs: (1) **Website** embeds and interacts with the actual V0 HTML at `/seller/website`, (2) **JS File** directly fetches `/seller/js-file/merchant.js` and parses the module data for profile, menu and inventory queries, (3) **REST API** calls parameterized `/api/*` routes, and (4) **Seller Agent** posts natural-language tasks to `/agent/message` in Mock or paid LLM mode. A separate fifth **Buyer Agent** tab remains for cross-interface comparisons. The panel displays HTTP response data, timing and a local session-only request log.
+**New main experiment:** an AI personal Buyer chooses **one of two similar fictional Italian restaurants**, and recommends a dish combination based on **total USD budget**, party size, taste, dietary constraints and value. Restaurant choice is not a real booking.
 
-For an existing external-drive installation, use the `casa_oliva_four_interface_dashboard_patch.zip` update pack provided in ChatGPT: run `apply_dashboard.py` from the `seller-interface-sandbox` directory. The patch only replaces `backend/demo.html` (with a backup) and **does not overwrite the working `backend/agent.py` Responses-API fix or any API credentials**. After installation, restart Uvicorn and refresh `http://127.0.0.1:8000/demo`. Mock Seller mode is free; LLM Seller and Buyer modes may incur third-party API charges.
+### The two merchants
+
+- **Casa Oliva**: original Restaurant V0, unchanged menu, Hong Kong demo address and phone; 6 items.
+- **Casa Verde**: synthetic similar alternative in `data/casa_verde.json`, 6 items; slightly different prices, mushroom/cheese/pasta profile. All information is fake.
+- The restaurants share identical static demo availability so the first experiment isolates *menu/budget/taste* comparisons. Address and phone have no influence on the recommendation unless the consumer explicitly requests those attributes.
+
+Each seller has four independent interfaces:
+
+| Seller interface | Casa Oliva | Casa Verde |
+| --- | --- | --- |
+| Website HTML | `GET /competition/website/oliva` | `GET /competition/website/verde` |
+| Static JavaScript file | `GET /competition/js/oliva` | `GET /competition/js/verde` |
+| REST API menu/profile | `GET /competition/api/oliva/{menu,profile}` | `GET /competition/api/verde/{menu,profile}` |
+| Seller Agent dialogue | `POST /competition/agent/oliva` | `POST /competition/agent/verde` |
+
+The main control panel is `http://127.0.0.1:8000/demo`. Click **Two-Seller Competition**, choose one interface per merchant, set preference/budget and run. The server receives one request at `POST /competition/run`, reads each seller via its specified route, then supplies only those **observations** to the Buyer LLM. The LLM selects a seller and proposes dishes, and a separate verifier checks dish identities and total USD against the selected merchant's canonical menu. Output includes paths, HTTP statuses, latency, token usage, model choice, menu budget check, and buyer narrative.
+
+The LLM Buyer is a **one-shot evidence reader** (not yet a browser-operating, multi-turn agent that chooses how many requests to make). The fixed data access adapter calls 1 GET for Website, 1 GET for JS File, 2 GETs for REST API, or 1 POST for Seller Agent; therefore number of calls / latency across arms currently reflect this engineering design and are **not** a fair normalized test of agent autonomy. The website arm strips HTML styling/scripts to the visible page text. JS is parsed as plain data, not executed. The Seller Agent's output is the actual response of the seller model if LLM mode is chosen, or a full menu/profile fixture in Mock mode. Model claims must be verified on more than one task/seed before interpretation.
+
+**LLM config:** reuse `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` and `BUYER_OPENAI_MODEL` from your existing terminal. GPT-6.1 Terra uses Responses API in both Seller and Buyer paths. `SELLER_COMPETITION_MODEL` can optionally override the LLM used for both merchant agents. This demo sends requests only when you click Run; no background tasks or automatic batch runs. It does not store credentials in the repo. The old `backend/agent.py` and original Seller Agent endpoint are unchanged.
+
+**Costs:** a standard Website / JS / API test with Buyer LLM uses one Buyer model request. Enabling LLM Seller for any Seller Agent arm also calls a separate seller model and can substantially increase tokens and cost. Token totals reflect SDK usage when the upstream provider exposes it; the dashboard does not calculate actual billed dollars.
+
+**Experiment design:** to isolate an interface advantage, **swap seller identities/interface assignments**, randomize presentation order, keep budgets/preferences fixed, and repeat across prompts / trials. Because this v0.1 has one pair of synthetic restaurants and fixed access patterns, results are exploratory, not causal evidence of a winner.
+
+**Tests:** `python -m pytest -q tests` (install `pytest` if needed). The test suite uses only mocked model responses, never your API key, and covers the 16 interface pairings.
