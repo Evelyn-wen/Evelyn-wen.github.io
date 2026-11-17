@@ -31,7 +31,7 @@ pip install -r backend/requirements.txt
 python -m uvicorn backend.app:app --reload
 ```
 
-Navigate to `http://127.0.0.1:8000/docs` for the interactive OpenAPI documentation.
+Open `http://127.0.0.1:8000/demo` for the visual API & Seller Agent comparison screen. Open `http://127.0.0.1:8000/docs` for interactive OpenAPI documentation.
 
 Try the API:
 
