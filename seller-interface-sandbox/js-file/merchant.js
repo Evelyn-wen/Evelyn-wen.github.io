@@ -1,0 +1,217 @@
+/* Casa Oliva demo merchant data; matches Website V0. No code execution is required to read merchant.json. */
+export const merchant = Object.freeze({
+  "schema_version": "0.1",
+  "data_version": "casa-oliva-v0-2026-11-17",
+  "merchant_id": "casa-oliva-hk-demo",
+  "demo_only": true,
+  "name": "Casa Oliva",
+  "tagline": "Italian Kitchen & Gathering Place",
+  "description": "A fictional Italian restaurant used in the Seller-side Interface Sandbox. Simple ingredients, honest cooking; a warm place to gather.",
+  "cuisine": "Italian",
+  "address": {
+    "english": "2/F, 18 Olive Lane, Central, Hong Kong",
+    "chinese": "香港中環橄欖里18號2樓",
+    "fictional": true,
+    "country": "Hong Kong"
+  },
+  "phone": "+852 6849 1948",
+  "phone_is_user_supplied_demo": true,
+  "timezone": "Asia/Hong_Kong",
+  "currency": "USD",
+  "average_price_per_person": 65,
+  "price_note": "Demo menu in USD; menu prices exclude tax and gratuity.",
+  "opening_hours": {
+    "monday": "17:00-22:00",
+    "tuesday": "17:00-22:00",
+    "wednesday": "17:00-22:00",
+    "thursday": "17:00-22:00",
+    "friday": "17:00-23:00",
+    "saturday": "17:00-23:00",
+    "sunday": "17:00-21:00"
+  },
+  "amenities": {
+    "indoor_seating": true,
+    "outdoor_seating": true,
+    "vegetarian_options": true
+  },
+  "reservation_policy": {
+    "demo_only": true,
+    "party_size_min": 2,
+    "party_size_max": 6,
+    "cancel_at_least_hours_before": 2,
+    "real_booking_supported": false,
+    "payments_supported": false
+  },
+  "menu": [
+    {
+      "id": "menu_01",
+      "name": "Burrata & Heirloom Tomato",
+      "description": "Creamy burrata, summer tomatoes, basil, olive oil.",
+      "category": "Starters",
+      "price": 19,
+      "dietary_note": "Vegetarian"
+    },
+    {
+      "id": "menu_02",
+      "name": "Wild Mushroom Tagliatelle",
+      "description": "Handmade ribbon pasta, wild mushrooms, parmesan.",
+      "category": "Pasta",
+      "price": 29,
+      "dietary_note": "Vegetarian"
+    },
+    {
+      "id": "menu_03",
+      "name": "Margherita Pizza",
+      "description": "San Marzano tomato, mozzarella, fresh basil.",
+      "category": "Pizza",
+      "price": 22,
+      "dietary_note": "Vegetarian"
+    },
+    {
+      "id": "menu_04",
+      "name": "Rigatoni alla Vodka",
+      "description": "Silky tomato-cream sauce, parmigiano, chili.",
+      "category": "Pasta",
+      "price": 27,
+      "dietary_note": "Contains dairy"
+    },
+    {
+      "id": "menu_05",
+      "name": "Herb-Roasted Chicken",
+      "description": "Rosemary jus, lemon, seasonal vegetables.",
+      "category": "Mains",
+      "price": 34,
+      "dietary_note": "Gluten-free option"
+    },
+    {
+      "id": "menu_06",
+      "name": "Classic Tiramisu",
+      "description": "Espresso-soaked layers and whipped mascarpone.",
+      "category": "Dessert",
+      "price": 13,
+      "dietary_note": "Vegetarian"
+    }
+  ],
+  "availability": [
+    {
+      "date": "2026-12-04",
+      "time": "18:00",
+      "seating": "indoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "18:30",
+      "seating": "outdoor",
+      "max_party_size": 4,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "18:30",
+      "seating": "indoor",
+      "max_party_size": 8,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "19:00",
+      "seating": "outdoor",
+      "max_party_size": 0,
+      "status": "fully_booked"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "19:00",
+      "seating": "indoor",
+      "max_party_size": 2,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "19:30",
+      "seating": "indoor",
+      "max_party_size": 4,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "20:00",
+      "seating": "outdoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "20:00",
+      "seating": "indoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-05",
+      "time": "17:30",
+      "seating": "outdoor",
+      "max_party_size": 2,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-05",
+      "time": "18:30",
+      "seating": "outdoor",
+      "max_party_size": 4,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-05",
+      "time": "19:00",
+      "seating": "outdoor",
+      "max_party_size": 0,
+      "status": "fully_booked"
+    },
+    {
+      "date": "2026-12-05",
+      "time": "19:00",
+      "seating": "indoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-05",
+      "time": "20:30",
+      "seating": "indoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-06",
+      "time": "18:30",
+      "seating": "outdoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-06",
+      "time": "19:00",
+      "seating": "outdoor",
+      "max_party_size": 6,
+      "status": "available"
+    },
+    {
+      "date": "2026-12-06",
+      "time": "19:00",
+      "seating": "indoor",
+      "max_party_size": 6,
+      "status": "available"
+    }
+  ],
+  "data_freshness": "static_fixed_demo_snapshot",
+  "notes": [
+    "The address is fictional.",
+    "This is not a real restaurant reservation system.",
+    "The listed phone is user-supplied demo contact data.",
+    "The sample availability covers Dec 4–6, 2026 only."
+  ]
+});
+export default merchant;
