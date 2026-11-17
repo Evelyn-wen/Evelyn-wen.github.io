@@ -67,18 +67,40 @@
     .status.warn {background:#fff0e7;color:#9b562b}
     @media(max-width:960px){.main-grid{grid-template-columns:1fr}.mode-btn{flex:1 1 160px}.mode-separator{display:none}.output{min-height:230px}}
     @media(max-width:540px){.container{padding:18px 12px 50px}.panel{padding:17px}.form-grid{grid-template-columns:1fr}.website-frame{height:400px}header{padding:24px 18px 30px}.mode-btn{min-width:calc(50% - 8px)}.mode-btn:last-child{min-width:100%}}
+
+    /* Two-seller comparison controls */
+    .competition-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0 18px}
+    .seller-card{padding:15px 17px;border:1px solid var(--line);border-radius:11px;background:#fbfcfa}
+    .seller-card.verde{background:#f3f9f4;border-color:#d3e2d4}
+    .seller-card strong{font:normal 23px/1.15 Georgia,serif;color:var(--green)}
+    .seller-card p{font-size:11px;color:#526457;margin:7px 0 12px;min-height:51px}
+    .seller-card .tiny-link{font-size:11px;margin-top:8px;display:inline-block}
+    .seller-card select{font-size:12px;background:#fff;padding:10px 8px}
+    .two-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+    .competition-label{font-size:11px;font-weight:800;margin:9px 0 5px;display:block}
+    .competition-note{background:#e9f1e8;border-left:3px solid #56805d;padding:11px;border-radius:4px;font-size:11px;color:#455b4a}
+    .sample-scenarios{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 15px}
+    .scenario{font-size:11px;padding:6px 9px;border:1px solid #d0d9ca;border-radius:6px;background:#fff;cursor:pointer;color:#38553e}
+    .decision-box{padding:15px;border:1px solid #ccddc9;border-radius:9px;background:#eff6eb;margin-bottom:17px}
+    .decision-box h3{margin:4px 0;font:normal 25px Georgia,serif}
+    .decision-box p{margin:7px 0 0;font-size:12px}
+    .decision-box .good{color:#265b35;font-size:11px;font-weight:800}
+    .decision-box .warning{color:#9c592e;font-size:11px;font-weight:800}
+    @media(max-width:620px){.competition-info,.two-fields{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body>
 <header><div class="header-inner">
   <div class="eyebrow">Seller-side Interface Sandbox · Casa Oliva V0</div>
-  <h1>One Restaurant. <em>Four Interfaces.</em></h1>
-  <p>同一个虚构餐厅、同一套菜单和模拟库存，分别通过 Website、JS File、REST API 与 Seller Agent 提供信息。</p>
+  <h1>Two Restaurants. <em>Four Interfaces.</em></h1>
+  <p>两家相似的虚构意大利餐厅。让 Buyer LLM 根据预算与偏好，通过四种商家接口选择一家。</p>
 </div></header>
 <main class="container">
-  <div class="subtitle"><span>先分别体验四种商家端入口，再用 Buyer Agent 做统一任务比较。</span><span class="pill">V0 · Fictional data · No bookings</span></div>
+  <div class="subtitle"><span>先运行两家餐厅的选择实验；下方也保留单家餐厅四种接口和旧版 Buyer 工具。</span><span class="pill">V0 · Fictional data · No bookings</span></div>
   <nav class="modebar" role="tablist" aria-label="Seller-side interface">
-    <button type="button" class="mode-btn active" role="tab" aria-selected="true" data-mode="website"><strong>01 · Website</strong><small>HTML · 传统餐厅网站</small></button>
+    <button type="button" class="mode-btn active" role="tab" aria-selected="true" data-mode="competition"><strong>★  Two-Seller Competition</strong><small>选择餐厅 · 预算与口味 · LLM Buyer</small></button>
+    <button type="button" class="mode-btn" role="tab" aria-selected="false" data-mode="website"><strong>01 · Website</strong><small>HTML · 传统餐厅网站</small></button>
     <button type="button" class="mode-btn" role="tab" aria-selected="false" data-mode="js"><strong>02 · JS File</strong><small>merchant.js · 静态数据</small></button>
     <button type="button" class="mode-btn" role="tab" aria-selected="false" data-mode="api"><strong>03 · REST API</strong><small>GET · 参数化查询</small></button>
     <button type="button" class="mode-btn" role="tab" aria-selected="false" data-mode="agent"><strong>04 · Seller Agent</strong><small>POST · 模型与工具调用</small></button>
@@ -87,9 +109,50 @@
   </nav>
   <div class="main-grid">
     <section class="panel" aria-label="Interaction controls">
-      <div class="panel-head"><div><h2 id="panel-title">Website V0</h2><p id="panel-description" class="desc">直接打开原版网站，并操作网页自己的订位筛选器。</p></div><span id="panel-badge" class="status">HTML</span></div>
+      <div class="panel-head"><div><h2 id="panel-title">Two-Seller Competition</h2><p id="panel-description" class="desc">Buyer Agent 比较 Casa Oliva 和 Casa Verde，决定选哪家。</p></div><span id="panel-badge" class="status">2 SELLERS</span></div>
 
-      <div id="controls-website">
+      <div id="controls-competition">
+        <p class="competition-note"><strong>研究任务：</strong>消费者只给预算和口味偏好，由 Buyer Agent 从两家餐厅获取菜单与价格，选出一家和菜品组合。可以故意为两家配置不同的商家接口。所有数据均为虚构。</p>
+        <div class="competition-info">
+          <div class="seller-card">
+            <strong>Casa Oliva</strong>
+            <p>手工蘑菇意面 $29 · 玛格丽特披萨 $22 · 平均人均 $65（USD）</p>
+            <label class="competition-label" for="oliva-interface">选择 Seller-side Interface</label>
+            <select id="oliva-interface"><option value="website">Website · HTML</option><option value="js">JS File · 数据</option><option value="api">REST API · 查询</option><option value="seller_agent">Seller Agent · 对话</option></select>
+            <a class="tiny-link" href="/competition/website/oliva" target="_blank" rel="noopener noreferrer">打开餐厅网页</a>
+          </div>
+          <div class="seller-card verde">
+            <strong>Casa Verde</strong>
+            <p>松露蘑菇宽面 $32 · 四重芝士披萨 $25 · 平均人均 $62（USD）</p>
+            <label class="competition-label" for="verde-interface">选择 Seller-side Interface</label>
+            <select id="verde-interface"><option value="website">Website · HTML</option><option value="js">JS File · 数据</option><option value="api">REST API · 查询</option><option value="seller_agent">Seller Agent · 对话</option></select>
+            <a class="tiny-link" href="/competition/website/verde" target="_blank" rel="noopener noreferrer">打开餐厅网页</a>
+          </div>
+        </div>
+        <label for="competition-preferences" class="section-label">消费者口味与饮食要求（可自由修改）</label>
+        <textarea id="competition-preferences" style="min-height:120px">我们两个人想吃意大利菜，喜欢蘑菇、芝士和意面，其中一个人吃素。请推荐两道主菜，考虑性价比，不需要预订座位。</textarea>
+        <div class="sample-scenarios" aria-label="偏好示例">
+          <button type="button" class="scenario" data-scenario="mushroom">蘑菇 + 芝士</button>
+          <button type="button" class="scenario" data-scenario="budget">预算敏感</button>
+          <button type="button" class="scenario" data-scenario="chicken">偏好鸡肉</button>
+        </div>
+        <div class="two-fields">
+          <div><label class="competition-label" for="competition-budget">总预算 · USD（不含税和小费）</label><input id="competition-budget" type="number" value="75" min="1" max="10000" step="1"></div>
+          <div><label class="competition-label" for="competition-party">人数</label><input id="competition-party" type="number" value="2" min="1" max="8" step="1"></div>
+        </div>
+        <div class="two-fields">
+          <div><label class="competition-label" for="competition-buyer-mode">Buyer Agent</label><select id="competition-buyer-mode"><option value="llm">LLM Buyer · 调用付费模型</option><option value="mock">Rule-based Mock · 仅管道测试</option></select></div>
+          <div><label class="competition-label" for="competition-seller-mode">Seller Agent 使用哪种模式？</label><select id="competition-seller-mode"><option value="mock">Mock Seller（不调用 Seller LLM）</option><option value="llm">LLM Seller（额外收费）</option></select></div>
+        </div>
+        <div class="two-fields">
+          <div><label class="competition-label" for="competition-order">证据呈现顺序（控制位置效应）</label><select id="competition-order"><option value="oliva_first">先 Oliva 后 Verde</option><option value="verde_first">先 Verde 后 Oliva</option></select></div>
+          <div><label class="competition-label">实验条件</label><div class="hint" id="competition-condition">Oliva: Website · Verde: Website</div></div>
+        </div>
+        <div class="note">只有点击运行才会调用付费 LLM。建议第一轮设为两家都是 Website，之后交换接口和呈现顺序。Mock Buyer 不会自主理解偏好，也不能用来估计接口对选择的影响。</div>
+        <div class="actions"><button type="button" class="primary" id="competition-run">运行两家餐厅竞争实验</button><button type="button" class="secondary" id="competition-export">下载完整实验结果 JSON</button></div>
+      </div>
+
+      <div id="controls-website" hidden>
         <div class="path">GET /seller/website</div>
         <p class="hint">下面嵌入的就是 Casa Oliva 原始 HTML。这里的互动来自网页本身，不通过 REST API 或 Seller Agent。</p>
         <iframe id="website-frame" class="website-frame" src="/seller/website" title="Casa Oliva Website V0" loading="eager"></iframe>
@@ -158,6 +221,7 @@
     <aside class="panel" aria-label="Response and trace">
       <div class="trace-header"><h2>Response & Trace</h2><button type="button" id="copy-output" class="secondary" style="min-height:34px;padding:7px 10px;font-size:11px">复制结果</button></div>
       <div class="meta" id="meta">准备就绪 · 选择一种交互方式开始</div>
+      <div id="decision-summary" class="decision-box" hidden></div>
       <pre class="output" id="output" aria-live="polite">Website 页面已经嵌入在左侧。你可以直接操作原网站，也可以点击「读取 HTML 源码」检查它返回的网页文件。</pre>
       <div class="subnav"><a href="/health" target="_blank" rel="noopener noreferrer">服务器状态</a><a href="/docs" target="_blank" rel="noopener noreferrer">API 文档</a><a href="/api/restaurant" target="_blank" rel="noopener noreferrer">商家资料</a></div>
       <div class="ledger"><div class="trace-header"><h3>最近运行记录</h3><button type="button" class="secondary" id="download-log" style="min-height:29px;padding:4px 9px;font-size:10px">导出 JSON</button></div><p>仅保存在本次浏览器页面中；关闭或刷新后清空。模型调用可能产生费用。</p><ol class="ledger-list" id="ledger-list"><li>尚无请求记录</li></ol></div>
@@ -170,6 +234,7 @@
   'use strict';
   const byId = (id) => document.getElementById(id);
   const labels = {
+    competition:['Two-Seller Competition','Buyer Agent 比较 Casa Oliva 与 Casa Verde，选出餐厅及菜单组合。','2 SELLERS'],
     website:['Website V0','直接打开原版网站，并操作网页自己的订位筛选器。','HTML'],
     js:['JS File','读取商家发布的 JavaScript 数据模块并解析。','ES MODULE'],
     api:['REST API','通过 HTTP GET 参数化查询商家信息。','HTTP GET'],
@@ -177,7 +242,8 @@
     buyer:['Buyer Agent','将相同消费者任务发送到指定商家接口。','COMPARISON']
   };
   const history = [];
-  let active = 'website';
+  let active = 'competition';
+  let competitionResult=null;
   let lastOutput = '';
 
   function showOutput(data, meta, isError=false) {
@@ -202,11 +268,12 @@
       const on=b.dataset.mode===mode;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on));
     });
     Object.keys(labels).forEach(k=>{byId(k==='buyer'?'buyer-controls':'controls-'+k).hidden=k!==mode;});
+    byId('decision-summary').hidden=true;
     byId('panel-title').textContent=labels[mode][0];
     byId('panel-description').textContent=labels[mode][1];
     byId('panel-badge').textContent=labels[mode][2];
     byId('seller-mode-wrapper').hidden=byId('buyer-interface').value!=='seller_agent';
-    const intro={website:'Website 已嵌入左侧。可直接浏览、筛选，或点击「读取 HTML 源码」。',js:'点击「读取 JS File」以实际请求 merchant.js。',api:'选择 API 和参数，点击「调用 REST API」。',agent:'选择规则模式或 LLM 模式，发送订餐需求。',buyer:'选择四种 Seller-side Interface 之一和 Buyer 模式，执行消费者任务。'};
+    const intro={competition:'填写两家餐厅的接口和消费者偏好，点击运行。结果将显示最终选中的餐厅、菜品及价格验证。',website:'Website 已嵌入左侧。可直接浏览、筛选，或点击「读取 HTML 源码」。',js:'点击「读取 JS File」以实际请求 merchant.js。',api:'选择 API 和参数，点击「调用 REST API」。',agent:'选择规则模式或 LLM 模式，发送订餐需求。',buyer:'选择四种 Seller-side Interface 之一和 Buyer 模式，执行消费者任务。'};
     showOutput(intro[mode],'当前交互方式 · '+labels[mode][0]);
   }
   async function fetchData(url,init={},displayMode=active){
@@ -292,6 +359,49 @@
       body:JSON.stringify({task:byId('buyer-task').value,interface:byId('buyer-interface').value,buyer_mode:byId('buyer-mode').value,seller_mode:byId('buyer-seller-mode').value})
     },'Buyer Agent');
   }
+  function updateCondition(){
+    const oi=byId('oliva-interface').value,vi=byId('verde-interface').value;
+    byId('competition-condition').textContent='Oliva: '+oi+'  /  Verde: '+vi;
+    byId('competition-seller-mode').disabled=oi!=='seller_agent'&&vi!=='seller_agent';
+  }
+  async function runCompetition(){
+    byId('decision-summary').hidden=true;competitionResult=null;
+    const budget=Number(byId('competition-budget').value),n=Number(byId('competition-party').value);
+    if(!budget||budget<=0||n<1||n>8){showOutput('请填写有效总预算和人数。','输入验证',true);return;}
+    const body={preference:byId('competition-preferences').value,budget_usd:budget,party_size:n,
+      oliva_interface:byId('oliva-interface').value,verde_interface:byId('verde-interface').value,
+      buyer_mode:byId('competition-buyer-mode').value,seller_mode:byId('competition-seller-mode').value,
+      presentation_order:byId('competition-order').value};
+    const result=await fetchData('/competition/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},'Competition');
+    if(!result||!result.response.ok)return;
+    competitionResult=result.data;
+    const decision=result.data.decision||{},verified=result.data.pricing_check||{},sel=decision.selected_seller;
+    const box=byId('decision-summary');box.replaceChildren();box.hidden=false;
+    const header=document.createElement('div');header.className=sel?'good':'warning';
+    header.textContent=sel?'Buyer Agent 已选择餐厅':'本次没有作出有效选择';box.append(header);
+    const title=document.createElement('h3');title.textContent=sel==='oliva'?'Casa Oliva':sel==='verde'?'Casa Verde':'未选出餐厅';box.append(title);
+    const dishes=document.createElement('p');dishes.textContent='推荐菜品：'+(decision.chosen_dish_names||[]).join(' + ');box.append(dishes);
+    const cost=document.createElement('p');cost.textContent='计算价格：'+(verified.verified?'USD '+verified.sum_usd:'无法验证')+' · 预算内：'+(verified.within_budget?'是':'否或未知');box.append(cost);
+    const reason=document.createElement('p');reason.textContent=decision.reason_zh||'';box.append(reason);
+    const compare=document.createElement('p');compare.textContent=decision.comparison_zh||'';box.append(compare);
+    const meta=document.createElement('p');meta.className='hint';
+    meta.textContent='HTTP 请求 '+result.data.request_count+' 次 · 总耗时 '+result.data.elapsed_ms+' ms · Buyer tokens '+(result.data.usage?.buyer?.total_tokens??'Mock')+' · Seller tokens '+(result.data.usage?.seller_total_tokens??0);
+    box.append(meta);
+  }
+  for (const id of ['oliva-interface','verde-interface'])byId(id).addEventListener('change',updateCondition);
+  document.querySelectorAll('[data-scenario]').forEach(btn=>btn.addEventListener('click',()=>{
+    const samples={mushroom:['我们两个人爱吃蘑菇、芝士、意面；一个人吃素。需要两道主菜，优先好吃且物有所值。',75],
+      budget:['两人晚餐，总预算非常紧张；想吃意大利菜、至少一份意面，尽可能控制价格。推荐两道菜。',53],
+      chicken:['我们两个人，一人很喜欢烤鸡，另一人爱披萨，比较价格和餐厅菜单，推荐两道主菜。',80]};
+    const item=samples[btn.dataset.scenario];byId('competition-preferences').value=item[0];byId('competition-budget').value=item[1];
+  }));
+  byId('competition-run').addEventListener('click',runCompetition);
+  byId('competition-export').addEventListener('click',()=>{
+    if(!competitionResult){showOutput('请先运行一次竞争实验，再下载结果。','尚无实验结果',true);return;}
+    const blob=new Blob([JSON.stringify(competitionResult,null,2)],{type:'application/json'}),href=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=href;a.download='casa_oliva_verde_competition_result.json';a.click();setTimeout(()=>URL.revokeObjectURL(href),1000);
+  });
+  updateCondition();
   document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>switchMode(btn.dataset.mode)));
   byId('website-inspect').addEventListener('click',inspectWebsite);
   byId('js-action').addEventListener('change',()=>byId('js-filter').hidden=byId('js-action').value!=='availability');
@@ -309,7 +419,7 @@
     const uri=URL.createObjectURL(blob);const a=document.createElement('a');a.href=uri;a.download='casa_oliva_console_trace.json';a.click();setTimeout(()=>URL.revokeObjectURL(uri),1000);
   });
   byId('website-frame').addEventListener('load',()=>{if(active==='website')byId('meta').textContent='Website iframe 已载入 · GET /seller/website';});
-  switchMode('website');
+  switchMode('competition');
 })();
 </script>
 </body>
