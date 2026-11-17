@@ -86,10 +86,13 @@ def llm_reply(message, history=None):
     msgs.append({'role':'user','content':message})
     trace=[]
     model=os.getenv('OPENAI_MODEL','gpt-4.1-mini')
-    for _ in range(4):
-        completion=client.chat.completions.create(model=model,messages=msgs,tools=TOOLS,tool_choice='auto',temperature=0)
+    for attempt in range(4):
+        completion=client.chat.completions.create(model=model,messages=msgs,tools=TOOLS,tool_choice='required' if attempt == 0 else 'auto',temperature=0)
         choice=completion.choices[0].message
-        msgs.append(choice.model_dump(exclude_none=True))
+        if choice.tool_calls:
+            msgs.append({'role':'assistant','content':choice.content or '', 'tool_calls':[{'id':t.id,'type':'function','function':{'name':t.function.name,'arguments':t.function.arguments}} for t in choice.tool_calls]})
+        else:
+            msgs.append({'role':'assistant','content':choice.content or ''})
         if not choice.tool_calls:
             return {'mode':'llm_tool_calling','model':model,'reply':choice.content or '', 'tool_trace':trace,
                     'demo_only':True,'data_version':merchant_data()['data_version']}
