@@ -123,3 +123,10 @@ Uvicorn with `Ctrl+C`, download the latest project (or apply the included update
 patch), run `python -m pip install -r backend/requirements.txt` inside the existing
 venv, restart `python -m uvicorn backend.app:app --reload`, and refresh `/demo`.
 The external disk must remain connected while running the service.
+
+
+## Unified four-interface console (updated 2026-11-17)
+
+The `/demo` dashboard now has four separate **seller-facing** tabs: (1) **Website** embeds and interacts with the actual V0 HTML at `/seller/website`, (2) **JS File** directly fetches `/seller/js-file/merchant.js` and parses the module data for profile, menu and inventory queries, (3) **REST API** calls parameterized `/api/*` routes, and (4) **Seller Agent** posts natural-language tasks to `/agent/message` in Mock or paid LLM mode. A separate fifth **Buyer Agent** tab remains for cross-interface comparisons. The panel displays HTTP response data, timing and a local session-only request log.
+
+For an existing external-drive installation, use the `casa_oliva_four_interface_dashboard_patch.zip` update pack provided in ChatGPT: run `apply_dashboard.py` from the `seller-interface-sandbox` directory. The patch only replaces `backend/demo.html` (with a backup) and **does not overwrite the working `backend/agent.py` Responses-API fix or any API credentials**. After installation, restart Uvicorn and refresh `http://127.0.0.1:8000/demo`. Mock Seller mode is free; LLM Seller and Buyer modes may incur third-party API charges.
